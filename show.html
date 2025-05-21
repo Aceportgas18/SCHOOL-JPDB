@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
     <head>
         <title>SCHOOL Macro Project</title>
@@ -7,48 +6,102 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f9fa;
+                margin: 0;
+                padding: 0;
+            }
+            h1 {
+                color: #343a40;
+                text-align: center;
+                margin-top: 30px;
+            }
+            #content {
+                max-width: 500px;
+                margin: 30px auto;
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                text-align: center;
+            }
+            input[type="text"] {
+                width: 80%;
+                padding: 8px;
+                margin-bottom: 15px;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+            input[type="button"] {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background-color 0.3s ease;
+            }
+            input[type="button"]:hover {
+                background-color: #0056b3;
+            }
+            #show {
+                margin-top: 20px;
+                color: #495057;
+                font-weight: bold;
+            }
+        </style>
     </head>
     <body>
-    <center><h1>Show Data</h1></center>
-    <center><input id="rollno" maxlength="50" placeholder="Roll No" name="rollno" type="text" /><br><br>
-        <input type="button" value="SHOW DATA" onclick="showData();"/></center>
-    <p id="show"></p>
-    <script>
-        function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
-            var url = dbBaseUrl + apiEndPointUrl;
-            var jsonObj;
-            $.post(url, reqString, function (result) {
-                jsonObj = JSON.parse(result);
-            }).fail(function (result) {
-                var dataJsonObj = result.responseText;
-                jsonObj = JSON.parse(dataJsonObj);
-            });
-            return jsonObj;
-        }
-        function showData(){
-            var token = "90934657|-31949207299997335|90956036";
-            var dbname = "STUDENT-DB";
-            var relationName = "STUDENT-TABLE";
-            var roll = document.getElementById("rollno").value;
-            var jsonStr = {
-                RollNo : roll
-            };
-            var reqString = createGETRequest(token, dbname, relationName, JSON.stringify(jsonStr));
-            alert(reqString);
-            jQuery.ajaxSetup({async: false});
-            var resultObj = executeCommand(reqString,
+        <h1>Show Data</h1>
+        <div id="content">
+            <input id="rollno" maxlength="50" placeholder="Roll No" name="rollno" type="text" />
+            <br>
+            <input type="button" value="SHOW DATA" onclick="showData();" />
+            <p id="show"></p>
+        </div>
+        <script>
+            function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+                var url = dbBaseUrl + apiEndPointUrl;
+                var jsonObj;
+                $.post(url, reqString, function (result) {
+                    jsonObj = JSON.parse(result);
+                }).fail(function (result) {
+                    var dataJsonObj = result.responseText;
+                    jsonObj = JSON.parse(dataJsonObj);
+                });
+                return jsonObj;
+            }
+            function showData() {
+                var roll = document.getElementById("rollno").value;
+                if (!roll) {
+                    alert("Please enter a Roll No.");
+                    return;
+                }
+                var token = "90934657|-31949207299997335|90956036";
+                var dbname = "STUDENT-DB";
+                var relationName = "STUDENT-TABLE";
+                var jsonStr = {
+                    RollNo: roll
+                };
+                var reqString = createGETRequest(token, dbname, relationName, JSON.stringify(jsonStr));
+                jQuery.ajaxSetup({ async: false });
+                var resultObj = executeCommand(reqString,
                     "http://api.login2explore.com:5577", "/api/irl");
-            jQuery.ajaxSetup({async: true});
-            
-            var data = JSON.stringify(resultObj);
-            
-            var res = data.split("\"");
-            var mainContainer = document.getElementById("show");
-            mainContainer.innerHTML = "Name : " + res[18].replace("\\","") + "      Email : " + res[10].replace("\\","")
-                + "     Course : " + res[22].replace("\\","") + "        Branch : " + res[14].replace("\\", ""); 
-
-            
-        }
-    </script>
+                jQuery.ajaxSetup({ async: true });
+                if (resultObj.status === 400) {
+                    document.getElementById("show").innerText = "No data found for Roll No: " + roll;
+                    return;
+                }
+                var data = JSON.stringify(resultObj);
+                var res = data.split("\"");
+                var mainContainer = document.getElementById("show");
+                mainContainer.innerHTML = "Name: " + res[18].replace("\\", "") + " | Email: " + res[10].replace("\\", "")
+                    + " | Course: " + res[22].replace("\\", "") + " | Branch: " + res[14].replace("\\", "");
+            }
+        </script>
     </body>
 </html>
